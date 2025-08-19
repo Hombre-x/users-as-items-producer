@@ -3,7 +3,6 @@ package amenities
 
 import cats.effect.{Resource, Sync}
 import domain.config.ProducerConfig
-
 import fs2.kafka.ProducerSettings
 
 import java.util.UUID
