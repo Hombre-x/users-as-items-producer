@@ -2,11 +2,16 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "3.7.1"
 
+ThisBuild / semanticdbEnabled := true
+
 lazy val root = (project in file("."))
   .settings(
     name                 := "users-as-items-producer",
     idePackagePrefix     := Some("com.mycode"),
     Compile / run / fork := true,
+    
+    scalacOptions ++= List("-Wunused:all"),
+    scalafixOnCompile    := true,
     libraryDependencies ++= List(
       // Typelevel toolkit
       "org.typelevel" %% "toolkit" % "0.1.29",
@@ -26,11 +31,10 @@ lazy val root = (project in file("."))
       "is.cir" %% "ciris" % "3.10.0",
 
       // Iron Types
-      "io.github.iltotore" %% "iron" % "3.1.0",
-      "io.github.iltotore" %% "iron-cats" % "3.1.0",
+      "io.github.iltotore" %% "iron"       % "3.1.0",
+      "io.github.iltotore" %% "iron-cats"  % "3.1.0",
       "io.github.iltotore" %% "iron-circe" % "3.1.0",
       "io.github.iltotore" %% "iron-skunk" % "3.1.0",
-
 
       // Java
       "ch.qos.logback" % "logback-classic" % "1.5.18"
