@@ -1,8 +1,7 @@
 package com.mycode
 package algebras
 
-import cats.Monad
-import cats.effect.{MonadCancel, MonadCancelThrow, Sync}
+import cats.effect.{MonadCancelThrow, Sync}
 import cats.syntax.all.*
 
 import skunk.*
@@ -16,7 +15,6 @@ import domain.user.*
 import domain.skunk.Pool
 import domain.skunk.UserCodecs.*
 
-
 trait Users[F[_]]:
 
   def get(username: Username): F[Option[User]]
@@ -29,15 +27,9 @@ end Users
 
 object Users:
 
-  def postgres[F[_] : {Sync, MonadCancelThrow}](postgres: Pool[F]): Users[F] = new Users[F]:
+  def postgres[F[_]: {Sync, MonadCancelThrow}](postgres: Pool[F]): Users[F] = new Users[F]:
 
-    import UsersSql.{
-      selectUser,
-      selectUserById,
-      createUser,
-      changeUser,
-      deleteUser
-    }
+    import UsersSql.{selectUser, selectUserById, createUser, changeUser, deleteUser}
 
     override def get(username: Username): F[Option[User]] = postgres.use(se => se.option(selectUser)(username))
 
@@ -52,25 +44,24 @@ object Users:
 
     override def update(user: UpdateUser): F[Username] =
       postgres.use: se =>
-        for 
-          now <- Sync[F].delay(LocalDateTime.now())
-          cmd <- se.prepare(changeUser)
+        for
+          now      <- Sync[F].delay(LocalDateTime.now())
+          cmd      <- se.prepare(changeUser)
           username <- cmd
-            .execute((user.email, user.name, now, user.username))
-            .as(user.username)
-            .recoverWith:
-              case e => e.raiseError[F, Username]
+                        .execute((user.email, user.name, now, user.username))
+                        .as(user.username)
+                        .recoverWith:
+                          case e => e.raiseError[F, Username]
         yield username
-          
-    override def delete(username: Username): F[Boolean] = 
+
+    override def delete(username: Username): F[Boolean] =
       postgres.use: se =>
         se.execute(deleteUser)(username)
-        .map: 
-          case Delete(n) if n > 0 => true
-          case _ => false
-        .recoverWith:
-          case e => e.raiseError[F, Boolean]
-
+          .map:
+            case Delete(n) if n > 0 => true
+            case _                  => false
+          .recoverWith:
+            case e => e.raiseError[F, Boolean]
 
 end Users
 
@@ -122,10 +113,10 @@ private object UsersSql:
     """
 
   // Queries & Commands
-  val selectUser = selectUserSql.query(userDecoder)
+  val selectUser     = selectUserSql.query(userDecoder)
   val selectUserById = selectUserByIdSql.query(userDecoder)
-  val createUser = createUserSql.command
-  val changeUser = changeUserSql.command
-  val deleteUser = deleteUserSql.command
+  val createUser     = createUserSql.command
+  val changeUser     = changeUserSql.command
+  val deleteUser     = deleteUserSql.command
 
 end UsersSql

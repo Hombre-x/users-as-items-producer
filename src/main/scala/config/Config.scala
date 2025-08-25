@@ -13,9 +13,9 @@ object Config:
   def load[F[_]: Async]: F[AppConfig] =
     (
       env("KAFKA_BOOTSTRAP_SERVER").default("localhost:19092"),
-      env("WAREHOUSE_SERVER_PORT").as[Int].default(9000),
+      env("WAREHOUSE_SERVER_PORT").as[Int].default(9000)
     )
-      .parMapN( (kafkaUri, port) =>
+      .parMapN((kafkaUri, port) =>
         AppConfig(
           producerConfig = ProducerConfig(
             kafkaUri
@@ -25,8 +25,8 @@ object Config:
             "default-group"
           ),
           httpConfig = HttpConfig(
-              "localhost",
-              Port.fromInt(port).get
+            "localhost",
+            Port.fromInt(port).get
           )
         )
       )

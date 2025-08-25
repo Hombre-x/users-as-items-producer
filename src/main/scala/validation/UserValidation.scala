@@ -27,6 +27,5 @@ object UserValidation:
       Email.validatedNec(user.email.value),
       Name.validatedNec(user.name.value)
     ).mapN(UpdateUser.apply)
-    
- 
+
 end UserValidation

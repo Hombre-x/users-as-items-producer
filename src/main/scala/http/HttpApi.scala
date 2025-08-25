@@ -1,17 +1,17 @@
 package com.mycode
 package http
 
+import cats.effect.Temporal
 
-import cats.MonadThrow
-import org.http4s.server.middleware.{CORS, ErrorHandling, Metrics}
+import org.http4s.server.middleware.{CORS, ErrorHandling}
 import http.routes.HealthRoutes
 
 import org.http4s.HttpRoutes
 
-class HttpApi[F[_] : MonadThrow]:
-  
+class HttpApi[F[_]: Temporal]:
+
   private val healthRoutes = HealthRoutes[F].routes
-    
+
   private val allRoutes = healthRoutes
 
   private def corsRoutes(routes: HttpRoutes[F]): HttpRoutes[F] =
@@ -19,13 +19,13 @@ class HttpApi[F[_] : MonadThrow]:
 
   private def errorHandlingRoutes(routes: HttpRoutes[F]): HttpRoutes[F] =
     ErrorHandling.Recover.messageFailure(routes)
-    
+
   def routes: HttpRoutes[F] = (corsRoutes andThen errorHandlingRoutes)(allRoutes)
 
 end HttpApi
 
 object HttpApi:
-  
-  def make[F[_] : MonadThrow]: HttpApi[F] = new HttpApi[F]
+
+  def make[F[_]: Temporal]: HttpApi[F] = new HttpApi[F]
 
 end HttpApi
