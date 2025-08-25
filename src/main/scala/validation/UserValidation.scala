@@ -2,24 +2,31 @@ package com.mycode
 package validation
 
 import cats.syntax.all.*
-import cats.instances.list.*
-import cats.data.{Validated, ValidatedNel}
-import io.github.iltotore.iron.*
+
+import cats.data.{Validated, ValidatedNec}
+
 import io.github.iltotore.iron.cats.*
-import io.github.iltotore.iron.constraint.all.*
+
 import domain.user.*
 
 object UserValidation:
-  
-  def validateUsername(username: String): ValidatedNel[String, Username] =
-    Username.validatedNel(username)
-    
-  def validateCreateUser(user: CreateUser): ValidatedNel[String, CreateUser] =
+
+  def validateUsername(username: String): ValidatedNec[String, Username] =
+    Username.validatedNec(username)
+
+  def validateCreateUser(user: CreateUser): ValidatedNec[String, CreateUser] =
     (
-      Username.validatedNel(user.username.value),
-      Email.validatedNel(user.email.value),
-      Name.validatedNel(user.name.value)
+      Username.validatedNec(user.username.value),
+      Email.validatedNec(user.email.value),
+      Name.validatedNec(user.name.value)
     ).mapN(CreateUser.apply)
+
+  def validateUpdateUser(user: UpdateUser): ValidatedNec[String, UpdateUser] =
+    (
+      Username.validatedNec(user.username.value),
+      Email.validatedNec(user.email.value),
+      Name.validatedNec(user.name.value)
+    ).mapN(UpdateUser.apply)
     
  
 end UserValidation
