@@ -1,19 +1,20 @@
 package com.mycode
 
-import cats.effect.{IO, IOApp}
+import algebras.Users
+import amenities.{AppResources, MkHttpServer}
+import config.Config
+import core.Warehouse
+import http.HttpApi
 
+import cats.effect.{IO, IOApp}
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-
-import amenities.{AppResources, MkHttpServer}
-
-import config.Config
-
-import com.mycode.http.HttpApi
+import org.typelevel.otel4s.trace.Tracer
 
 object Main extends IOApp.Simple:
 
   given logger: Logger[IO] = Slf4jLogger.getLoggerFromName("Main")
+  given tracer: Tracer[IO] = Tracer.noop[IO]
 
   override def run: IO[Unit] =
 
@@ -22,10 +23,12 @@ object Main extends IOApp.Simple:
       .flatMap: config =>
         logger.info(s"Loading config for application: $config") >>
           AppResources
-            .make(config)
-            .use: _ =>
-              val httpApi = HttpApi.make[IO]
-              val server  = MkHttpServer.make[IO].ember(config.httpConfig.port, httpApi.routes)
+            .make[IO](config)
+            .use: resources =>
+              val users     = Users.postgres(resources.postgres)
+              val warehouse = Warehouse[IO](users, resources.userProducer)
+              val httpApi   = HttpApi.make[IO](warehouse)
+              val server    = MkHttpServer.make[IO].ember(config.httpConfig.port, httpApi.routes)
 
               server.useForever
                 .onCancel(logger.info("Closing server..."))
