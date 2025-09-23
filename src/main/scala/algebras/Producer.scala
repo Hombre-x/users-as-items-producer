@@ -6,6 +6,8 @@ import cats.effect.std.UUIDGen
 import cats.effect.{Async, Resource}
 import fs2.kafka.{KafkaProducer, ProducerSettings}
 
+import java.util.UUID
+
 trait Producer[F[_], A]:
 
   def send(a: A): F[Unit]
@@ -15,7 +17,7 @@ end Producer
 object Producer:
 
   def kafka[F[_]: Async, A](
-      settings: ProducerSettings[F, String, A],
+      settings: ProducerSettings[F, UUID, A],
       topic: String
   ): Resource[F, Producer[F, A]] =
     KafkaProducer
@@ -24,7 +26,7 @@ object Producer:
         new:
           def send(a: A): F[Unit] =
             for
-              key <- UUIDGen.randomUUID[F].map(_.toString)
+              key <- UUIDGen.randomUUID[F]
               _   <- p.produceOne_(topic, key, a).flatten.void
             yield ()
 
