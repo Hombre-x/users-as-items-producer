@@ -30,11 +30,18 @@ lazy val root = (project in file("."))
       // Ciris
       "is.cir" %% "ciris" % "3.10.0",
 
+      // Scodec
+      "org.scodec" %% "scodec-core" % "2.3.3",
+
       // Iron Types
-      "io.github.iltotore" %% "iron"       % "3.1.0",
-      "io.github.iltotore" %% "iron-cats"  % "3.1.0",
-      "io.github.iltotore" %% "iron-circe" % "3.1.0",
-      "io.github.iltotore" %% "iron-skunk" % "3.1.0",
+      "io.github.iltotore" %% "iron"        % "3.2.0",
+      "io.github.iltotore" %% "iron-cats"   % "3.2.0",
+      "io.github.iltotore" %% "iron-circe"  % "3.2.0",
+      "io.github.iltotore" %% "iron-skunk"  % "3.2.0",
+      "io.github.iltotore" %% "iron-scodec" % "3.2.0",
+
+      // Ducktape
+      "io.github.arainko" %% "ducktape" % "0.2.10",
 
       // Java
       "ch.qos.logback" % "logback-classic" % "1.5.18"
