@@ -42,5 +42,5 @@ case class User(
     name: Name
 ) derives Codec
 
-case class UserNotFound(username: Username) extends NoStackTrace
+case class UserNotFound(username: Username)          extends NoStackTrace
 case class UsernameAlreadyExists(username: Username) extends NoStackTrace

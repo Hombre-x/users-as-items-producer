@@ -2,7 +2,7 @@ package com.mycode
 package http
 
 import cats.syntax.all.*
-import cats.effect.{Sync, Temporal}
+import cats.effect.Temporal
 import org.http4s.server.middleware.{CORS, ErrorAction, ErrorHandling}
 import http.routes.{HealthRoutes, UserRoutes}
 
@@ -45,7 +45,7 @@ end HttpApi
 
 object HttpApi:
 
-  def make[F[_]: {Temporal, Sync, MonadCancelThrow, Logger}](warehouse: Warehouse[F]): HttpApi[F] =
+  def make[F[_]: {Temporal, MonadCancelThrow, Logger}](warehouse: Warehouse[F]): HttpApi[F] =
     new HttpApi[F](warehouse)
 
 end HttpApi

@@ -23,8 +23,7 @@ object UserCommandCodec:
           .toEither
           .bimap(
             err => new Exception(err.messageWithContext),
-            _.toByteArray,
+            _.toByteArray
           )
-
 
 end UserCommandCodec

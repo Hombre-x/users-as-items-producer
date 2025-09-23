@@ -38,7 +38,7 @@ object Users:
         se.execute(createUser)(user)
           .as(user.username)
           .recoverWith:
-            case SqlState.UniqueViolation(_) => 
+            case SqlState.UniqueViolation(_) =>
               UsernameAlreadyExists(user.username).raiseError[F, Username]
 
     override def update(user: UpdateUser): F[Username] =
@@ -108,10 +108,10 @@ private object UsersSql:
     """
 
   // Queries & Commands
-  val selectUser: Query[Username, User] = selectUserSql.query(userDecoder)
-  val selectUserById: Query[UserId, User] = selectUserByIdSql.query(userDecoder)
-  val createUser: Command[User] = createUserSql.command
+  val selectUser: Query[Username, User]                           = selectUserSql.query(userDecoder)
+  val selectUserById: Query[UserId, User]                         = selectUserByIdSql.query(userDecoder)
+  val createUser: Command[User]                                   = createUserSql.command
   val changeUser: Command[(Email, Name, LocalDateTime, Username)] = changeUserSql.command
-  val deleteUser: Command[Username] = deleteUserSql.command
+  val deleteUser: Command[Username]                               = deleteUserSql.command
 
 end UsersSql
