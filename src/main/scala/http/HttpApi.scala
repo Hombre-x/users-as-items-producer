@@ -8,8 +8,8 @@ import http.routes.{HealthRoutes, UserRoutes}
 
 import cats.data.OptionT
 import cats.effect.kernel.MonadCancelThrow
-import com.mycode.core.Warehouse
-import com.mycode.http.middleware.ValidationMiddleware
+import core.Warehouse
+import http.middleware.ValidationMiddleware
 import org.http4s.HttpRoutes
 import org.typelevel.log4cats.Logger
 

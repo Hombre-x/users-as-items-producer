@@ -108,10 +108,10 @@ private object UsersSql:
     """
 
   // Queries & Commands
-  val selectUser     = selectUserSql.query(userDecoder)
-  val selectUserById = selectUserByIdSql.query(userDecoder)
-  val createUser     = createUserSql.command
-  val changeUser     = changeUserSql.command
-  val deleteUser     = deleteUserSql.command
+  val selectUser: Query[Username, User] = selectUserSql.query(userDecoder)
+  val selectUserById: Query[UserId, User] = selectUserByIdSql.query(userDecoder)
+  val createUser: Command[User] = createUserSql.command
+  val changeUser: Command[(Email, Name, LocalDateTime, Username)] = changeUserSql.command
+  val deleteUser: Command[Username] = deleteUserSql.command
 
 end UsersSql
