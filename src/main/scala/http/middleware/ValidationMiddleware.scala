@@ -1,47 +1,37 @@
 package com.mycode
 package http.middleware
 
-import cats.syntax.all.*
 import cats.data.*
-import cats.data.Validated
-import cats.effect.Async
 import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.*
-
-import typeclasses.Validator
 import domain.validation.ValidationError
+
+import cats.{Applicative, MonadThrow}
+import org.http4s.dsl.Http4sDsl
+import org.http4s.server.middleware.ErrorHandling
+import io.circe.*
+import org.http4s.circe.*
 
 object ValidationMiddleware:
 
-  /** Decode the request body as JSON of type `A`, validate it using an implicit Validator[A], and on success, delegate
-    * to the provided routes builder.
-    *
-    * Usage: wrap routes that expect a JSON body of type `A`. Only apply this to routes that actually receive such a
-    * body (e.g., POST/PUT endpoints).
-    */
-  def validateBody[F[_]: {Async}, A: Validator](
-      routes: A => HttpRoutes[F]
-  )(using EntityDecoder[F, A]): HttpRoutes[F] = Kleisli { (req: Request[F]) =>
-    val v = summon[Validator[A]]
-    // Decode the JSON body then validate it. On failure, return 400.
-    OptionT.liftF(req.as[A].attempt).flatMap {
-      case Right(decoded: A) =>
-        v.validate(decoded) match
-          case Validated.Valid(valid)    =>
-            routes(valid).run(req)
-          case Validated.Invalid(errors) =>
-            OptionT.pure[F](
-              Response(Status.BadRequest).withEntity(
-                ValidationError("Validation failed", errors.toNonEmptyList)
-              )
-            )
-      case Left(_)           =>
-        OptionT.pure[F](
-          Response(Status.BadRequest).withEntity(
-            ValidationError("Invalid JSON", NonEmptyList.one("Malformed or missing JSON body"))
-          )
-        )
-    }
-  }
+  private def badApiRequest[F[_]: Applicative](errors: NonEmptyList[String]): OptionT[F, Response[F]] =
+
+    val dsl = Http4sDsl[F]
+    import dsl.*
+    OptionT.liftF(BadRequest(ValidationError("Validation error at API", errors)))
+
+  end badApiRequest
+
+  def errorHandlingRoutes[F[_]: MonadThrow](routes: HttpRoutes[F]): HttpRoutes[F] =
+    ErrorHandling.Custom.recoverWith(routes):
+      case InvalidMessageBodyFailure(defaultMessage, cause)   =>
+        cause match
+          case Some(DecodingFailure(message, _)) => badApiRequest(NonEmptyList.one(message))
+          case Some(DecodingFailures(failures))  => badApiRequest(failures.map(_.message))
+          case _                                 => badApiRequest(NonEmptyList.one(defaultMessage))
+      case MalformedMessageBodyFailure(defaultMessage, cause) =>
+        cause match
+          case Some(ParsingFailure(message, _)) => badApiRequest(NonEmptyList.one(message))
+          case _                                => badApiRequest(NonEmptyList.one(defaultMessage))
 
 end ValidationMiddleware
