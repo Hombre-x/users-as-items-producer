@@ -1,22 +1,22 @@
 package com.mycode
 package amenities
 
-import domain.config.AppConfig
-import domain.skunk.Pool
-
-import cats.syntax.all.*
-import cats.effect.{Async, Resource}
-import cats.effect.std.Console
 import algebras.Producer
 import domain.commands.UserCommand
-import instances.users.codec.kafka.UserCommandCodec
+import domain.config.AppConfig
+import domain.skunk.Pool
+import serializers.kafka.UserCommandCodec
+
+import cats.effect.std.Console
+import cats.effect.{Async, Resource}
+import cats.syntax.all.*
 import fs2.io.net.Network
 import fs2.kafka.{ProducerSettings, Serializer}
 import org.typelevel.log4cats.Logger
 import org.typelevel.otel4s.trace.Tracer
-import skunk.{Session, SessionPool}
-import skunk.syntax.all.*
 import skunk.codec.text.*
+import skunk.syntax.all.*
+import skunk.{Session, SessionPool}
 
 import java.util.UUID
 

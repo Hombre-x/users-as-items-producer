@@ -17,26 +17,26 @@ enum UserCommand:
   case CreateUserCommand(
       id: CommandId,
       createdAt: Instant,
-      user: CreateUser,
+      user: CreateUser
   )
 
   case DeleteUserCommand(
       id: CommandId,
       createdAt: Instant,
-      username: Username,
+      username: Username
   )
 
   case UpdateUserCommand(
       id: CommandId,
       createdAt: Instant,
-      user: UpdateUser,
+      user: UpdateUser
   )
 
 end UserCommand
 
 object UserCommand:
-  
-  given Configuration = Configuration.default.withDiscriminator("$type")
+
+  given Configuration      = Configuration.default.withDiscriminator("$type")
   given Codec[UserCommand] = ConfiguredCodec.derived
-  
+
 end UserCommand

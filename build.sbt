@@ -1,5 +1,3 @@
-import scala.sys.process._
-
 ThisBuild / version := "0.1.1-SNAPSHOT"
 
 ThisBuild / scalaVersion := "3.7.3"

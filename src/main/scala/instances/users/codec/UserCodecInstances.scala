@@ -6,10 +6,8 @@ import cats.effect.Concurrent
 import org.http4s.{EntityDecoder, EntityEncoder}
 import org.http4s.circe.*
 
-
 import domain.user.*
 
 // Http4s EntityEncoder and EntityDecoder
 given [F[_]]: EntityEncoder[F, CreateUser]             = jsonEncoderOf[F, CreateUser]
 given [F[_]: Concurrent]: EntityDecoder[F, CreateUser] = accumulatingJsonOf[F, CreateUser]
-
