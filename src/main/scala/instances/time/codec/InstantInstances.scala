@@ -1,8 +1,12 @@
 package com.mycode
 package instances.time.codec
 
-import scodec.*
-import scodec.codecs.*
-import java.time.Instant
+import io.circe.{Codec, Decoder, Encoder}
 
-given Codec[Instant] = long(64).xmap[Instant](Instant.ofEpochMilli, _.toEpochMilli)
+import java.time.Instant
+import scala.util.Try
+
+given Codec[Instant] =  Codec.from(
+  Decoder.decodeString.emapTry(str => Try(Instant.parse(str))),
+  Encoder.encodeString.contramap(_.toString)
+)
