@@ -13,9 +13,9 @@ import warehouse.domain.EventType
 
 import java.util.UUID
 import java.time.Instant
-import warehouse.domain.outbox.OutboxEntry
+import warehouse.domain.outbox.{OutboxEntry, OutboxEntryNotFound}
 
-class Publisher[F[_]: {Concurrent, Parallel, Clock, Logger as log, UUIDGen}](
+class Publisher[F[_]: {Concurrent, Parallel, Clock, Logger as log}](
     producer: Producer[F, UserCommand],
     poller: Poller[F, String],
     outbox: Outbox[F]
@@ -29,7 +29,7 @@ class Publisher[F[_]: {Concurrent, Parallel, Clock, Logger as log, UUIDGen}](
       .evalMap(nt => log.info(s"Received notification: $nt"))
 
   def stream: Stream[F, UserCommand] =
-    processNotifications merge processOldNotifications.drain
+    processNotifications concurrently processOldNotifications
 
   private def processOldNotifications: Stream[F, Unit] =
     Stream
@@ -52,27 +52,37 @@ class Publisher[F[_]: {Concurrent, Parallel, Clock, Logger as log, UUIDGen}](
   private def receiveAndProduce(notStream: Stream[F, String]): Stream[F, UserCommand] =
     notStream
       .evalMap(outboxIdStr => Concurrent[F].catchNonFatal(UUID.fromString(outboxIdStr)))
-      .evalMap(outboxId => outbox.markAsProcessed(outboxId))
-      .evalMap(produceEvent)
+      .evalMap: outboxId =>
+        outbox
+          .getById(outboxId)
+          .flatMap:
+            case Some(entry) => entry.pure[F]
+            case None        =>
+              log.warn(s"Outbox entry with id $outboxId not found.") >>
+                OutboxEntryNotFound(outboxId).raiseError[F, OutboxEntry]
+              
+      .evalMap: entry =>
+        for
+          command <- produceEvent(entry)
+          _       <- outbox.markAsProcessed(entry.id)
+        yield command
 
   private def produceEvent(entry: OutboxEntry): F[UserCommand] =
-    for
-      command: UserCommand <- (
-                                UUIDGen[F].randomUUID,
-                                Clock[F].realTime.map(now => Instant.ofEpochMilli(now.toMillis)),
-                                entry.username.pure[F]
-                              ).parMapN: (uuid, timestamp, username) =>
-                                entry.eventType match
-                                  case EventType.UserCreated => UserCommand.CreateUserCommand(uuid, timestamp, username)
-                                  case EventType.UserUpdated => UserCommand.UpdateUserCommand(uuid, timestamp, username)
-                                  case EventType.UserDeleted => UserCommand.DeleteUserCommand(uuid, timestamp, username)
-      _                    <- producer.send(command)
-    yield command
+    (
+      Clock[F].realTime.map(now => Instant.ofEpochMilli(now.toMillis)),
+      entry.username.pure[F]
+    ).parMapN: (timestamp, username) =>
+      entry.eventType match
+        case EventType.UserCreated => UserCommand.CreateUserCommand(entry.eventId, timestamp, username)
+        case EventType.UserUpdated => UserCommand.UpdateUserCommand(entry.eventId, timestamp, username)
+        case EventType.UserDeleted => UserCommand.DeleteUserCommand(entry.eventId, timestamp, username)
+    .flatMap(command => producer.send(command).as(command))
+
 end Publisher
 
 object Publisher:
 
-  def apply[F[_]: {Concurrent, Parallel, Logger, Clock, UUIDGen}](
+  def apply[F[_]: {Concurrent, Parallel, Logger, Clock}](
       producer: Producer[F, UserCommand],
       poller: Poller[F, String],
       outbox: Outbox[F]
