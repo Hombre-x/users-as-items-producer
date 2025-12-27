@@ -11,9 +11,11 @@ import skunk.syntax.all.*
 import skunk.{Session, SessionPool}
 import warehouse.config.Config.AppConfig
 import warehouse.domain.skunk.Pool
+import warehouse.services.TransactionalServices
 
 case class AppResources[F[_]](
-    postgres: Pool[F]
+    postgres: Pool[F],
+    txServices: TransactionalServices[F]
 )
 
 object AppResources:
@@ -36,5 +38,15 @@ object AppResources:
           max = 8
         )
         .evalTap(checkPostgresConnection)
-
-    mkPostgres.map(postgres => AppResources(postgres))
+        
+    def mkTxServices(postgres: Pool[F]): Resource[F, TransactionalServices[F]] =
+      TransactionalServices.make[F](postgres)
+      
+    for 
+      postgres   <- mkPostgres
+      txServices <- mkTxServices(postgres)
+    yield 
+      AppResources[F](
+        postgres = postgres,
+        txServices = txServices
+      )
