@@ -22,13 +22,13 @@ object MkHttpServer:
   private def printVersion[F[_]](port: Port)(using log: Logger[F]): F[Unit] =
     log.info(s"Starting server with version: ${BuildInfo.version} on port: $port")
 
-  private def metrics[F[_]: Sync]: Resource[F, HttpMiddleware[F]] =
+  private def metrics[F[_] : Sync]: Resource[F, HttpMiddleware[F]] =
     for
       metricsService <- PrometheusExportService.build[F]
       metrics        <- Prometheus.metricsOps[F](metricsService.collectorRegistry)
     yield apiRoutes => Metrics[F](metrics)(metricsService.routes <+> apiRoutes)
 
-  def make[F[_]: {Async, Logger}]: MkHttpServer[F] = new MkHttpServer[F]:
+  def make[F[_] : {Async, Logger}]: MkHttpServer[F] = new MkHttpServer[F]:
 
     override def ember(port: Port, routes: HttpRoutes[F]): Resource[F, Server] =
       EmberServerBuilder

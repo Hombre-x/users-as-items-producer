@@ -12,7 +12,7 @@ import warehouse.domain.validation.ValidationError
 
 object ValidationMiddleware:
 
-  private def badApiRequest[F[_]: Applicative](errors: NonEmptyList[String]): OptionT[F, Response[F]] =
+  private def badApiRequest[F[_] : Applicative](errors: NonEmptyList[String]): OptionT[F, Response[F]] =
 
     val dsl = Http4sDsl[F]
     import dsl.*
@@ -20,7 +20,7 @@ object ValidationMiddleware:
 
   end badApiRequest
 
-  def errorHandlingRoutes[F[_]: MonadThrow](routes: HttpRoutes[F]): HttpRoutes[F] =
+  def errorHandlingRoutes[F[_] : MonadThrow](routes: HttpRoutes[F]): HttpRoutes[F] =
     ErrorHandling.Custom.recoverWith(routes):
       case InvalidMessageBodyFailure(defaultMessage, cause)   =>
         cause match

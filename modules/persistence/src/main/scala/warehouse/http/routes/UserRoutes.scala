@@ -9,7 +9,7 @@ import org.http4s.server.Router
 import warehouse.core.Warehouse
 import warehouse.domain.user.{CreateUser, UpdateUser, UserNotFound, Username, UsernameAlreadyExists}
 
-class UserRoutes[F[_]: {Concurrent, MonadCancelThrow}](warehouse: Warehouse[F]) extends Http4sDsl[F]:
+class UserRoutes[F[_] : {Concurrent, MonadCancelThrow}](warehouse: Warehouse[F]) extends Http4sDsl[F]:
 
   private val prefixPath = "/users"
 

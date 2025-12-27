@@ -6,5 +6,5 @@ import org.http4s.{EntityDecoder, EntityEncoder}
 import warehouse.domain.user.CreateUser
 
 // Http4s EntityEncoder and EntityDecoder
-given [F[_]]: EntityEncoder[F, CreateUser]             = jsonEncoderOf[F, CreateUser]
-given [F[_]: Concurrent]: EntityDecoder[F, CreateUser] = accumulatingJsonOf[F, CreateUser]
+given [F[_]]: EntityEncoder[F, CreateUser]              = jsonEncoderOf[F, CreateUser]
+given [F[_] : Concurrent]: EntityDecoder[F, CreateUser] = accumulatingJsonOf[F, CreateUser]

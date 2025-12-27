@@ -11,7 +11,7 @@ import warehouse.core.Warehouse
 import warehouse.http.middleware.ValidationMiddleware
 import warehouse.http.routes.{HealthRoutes, UserRoutes}
 
-class HttpApi[F[_]: {Temporal, MonadCancelThrow, Logger as log}] private (warehouse: Warehouse[F]):
+class HttpApi[F[_] : {Temporal, MonadCancelThrow, Logger as log}] private (warehouse: Warehouse[F]):
 
   private val healthRoutes = HealthRoutes[F].routes
   private val userRoutes   = UserRoutes[F](warehouse).routes
@@ -43,7 +43,7 @@ end HttpApi
 
 object HttpApi:
 
-  def make[F[_]: {Temporal, MonadCancelThrow, Logger}](warehouse: Warehouse[F]): HttpApi[F] =
+  def make[F[_] : {Temporal, MonadCancelThrow, Logger}](warehouse: Warehouse[F]): HttpApi[F] =
     new HttpApi[F](warehouse)
 
 end HttpApi

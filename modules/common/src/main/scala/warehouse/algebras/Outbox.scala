@@ -26,7 +26,7 @@ end Outbox
 
 object Outbox:
 
-  def postgres[F[_]: MonadCancelThrow](postgres: Pool[F]): Outbox[F] =
+  def postgres[F[_] : MonadCancelThrow](postgres: Pool[F]): Outbox[F] =
     new Outbox[F]:
       import OutboxSql.*
 

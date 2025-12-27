@@ -17,7 +17,7 @@ case class AppResources[F[_]](
 )
 
 object AppResources:
-  def make[F[_]: {Async, Tracer, Network, Logger, Console}](config: AppConfig): Resource[F, AppResources[F]] =
+  def make[F[_] : {Async, Tracer, Network, Logger, Console}](config: AppConfig): Resource[F, AppResources[F]] =
 
     def checkPostgresConnection(postgres: Pool[F]): F[Unit] = postgres.use: session =>
       session

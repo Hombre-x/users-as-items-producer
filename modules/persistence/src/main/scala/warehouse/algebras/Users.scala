@@ -27,7 +27,7 @@ end Users
 
 object Users:
 
-  def postgres[F[_]: {Sync, MonadCancelThrow}](
+  def postgres[F[_] : {Sync, MonadCancelThrow}](
       tx: Transactor[F],
       notifier: Notifier[F],
       outbox: Outbox[F],

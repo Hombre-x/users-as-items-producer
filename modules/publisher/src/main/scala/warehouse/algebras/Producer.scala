@@ -15,7 +15,7 @@ end Producer
 
 object Producer:
 
-  def kafka[F[_]: Async, A](
+  def kafka[F[_] : Async, A](
       settings: ProducerSettings[F, UUID, A],
       topic: String
   ): Resource[F, Producer[F, A]] =

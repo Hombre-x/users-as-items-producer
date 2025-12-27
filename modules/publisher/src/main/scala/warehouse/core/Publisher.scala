@@ -14,7 +14,7 @@ import warehouse.domain.outbox.{OutboxEntry, OutboxEntryNotFound}
 import java.util.UUID
 import java.time.Instant
 
-class Publisher[F[_]: {Concurrent, Parallel, Clock, Logger as log}](
+class Publisher[F[_] : {Concurrent, Parallel, Clock, Logger as log}](
     producer: Producer[F, UserCommand],
     poller: Poller[F, String],
     outbox: Outbox[F]
@@ -80,7 +80,7 @@ end Publisher
 
 object Publisher:
 
-  def apply[F[_]: {Concurrent, Parallel, Logger, Clock}](
+  def apply[F[_] : {Concurrent, Parallel, Logger, Clock}](
       producer: Producer[F, UserCommand],
       poller: Poller[F, String],
       outbox: Outbox[F]

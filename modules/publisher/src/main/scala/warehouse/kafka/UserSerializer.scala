@@ -8,5 +8,5 @@ import io.circe.syntax.*
 import warehouse.domain.commands.UserCommand
 
 object UserSerializer:
-  def serializer[F[_]: Sync]: Serializer[F, UserCommand] =
+  def serializer[F[_] : Sync]: Serializer[F, UserCommand] =
     Serializer.lift(_.asJson.noSpaces.getBytes("UTF-8").pure[F])

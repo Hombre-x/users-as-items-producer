@@ -9,7 +9,7 @@ object Config:
 
   case class AppConfig(producerConfig: ProducerConfig, postgresConfig: PostgreSQLConfig)
 
-  def load[F[_]: Async]: F[AppConfig] =
+  def load[F[_] : Async]: F[AppConfig] =
     (
       env("KAFKA_BOOTSTRAP_SERVER").default("localhost:19092"),
       env("WAREHOUSE_SERVER_PORT").as[Int].default(9000),

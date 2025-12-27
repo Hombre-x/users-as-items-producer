@@ -10,7 +10,7 @@ import org.http4s.server.Router
 
 import scala.concurrent.duration.*
 
-final class HealthRoutes[F[_]: Temporal] extends Http4sDsl[F]:
+final class HealthRoutes[F[_] : Temporal] extends Http4sDsl[F]:
 
   private val prefixPath = "/health"
 

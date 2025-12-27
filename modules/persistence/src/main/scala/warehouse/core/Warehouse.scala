@@ -10,7 +10,7 @@ import warehouse.domain.user.{CreateUser, UpdateUser, User, UserId, UserNotFound
 
 import java.util.UUID
 
-class Warehouse[F[_]: {ApplicativeThrow, UUIDGen, Clock, Concurrent}](users: Users[F]):
+class Warehouse[F[_] : {ApplicativeThrow, UUIDGen, Clock, Concurrent}](users: Users[F]):
 
   def addUser(createUser: CreateUser): F[Username] =
     for
@@ -55,7 +55,7 @@ end Warehouse
 
 object Warehouse:
 
-  def apply[F[_]: {ApplicativeThrow, UUIDGen, Clock, Concurrent}](
+  def apply[F[_] : {ApplicativeThrow, UUIDGen, Clock, Concurrent}](
       users: Users[F]
   ): Warehouse[F] = new Warehouse(users)
 

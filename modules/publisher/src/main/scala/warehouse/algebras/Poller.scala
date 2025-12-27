@@ -14,7 +14,7 @@ trait Poller[F[_], A]:
 end Poller
 
 object Poller:
-  def skunk[F[_]: Concurrent, A: Codec](postgres: Pool[F]): Poller[F, A] =
+  def skunk[F[_] : Concurrent, A : Codec](postgres: Pool[F]): Poller[F, A] =
     new:
       def receive(channel: Identifier): Stream[F, A] =
         Stream
@@ -25,7 +25,7 @@ object Poller:
             decode[A](notification.value)
           .rethrow
 
-  def string[F[_]: Concurrent](postgres: Pool[F]): Poller[F, String] =
+  def string[F[_] : Concurrent](postgres: Pool[F]): Poller[F, String] =
     new:
       def receive(channel: Identifier): Stream[F, String] =
         Stream

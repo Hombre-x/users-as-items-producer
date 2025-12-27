@@ -8,7 +8,7 @@ trait Transactor[F[_]]:
   def transact[A](f: Session[F] => F[A]): F[A]
 
 object Transactor:
-  def pooledSession[F[_]: {MonadCancelThrow}](postgres: Pool[F]): Transactor[F] =
+  def pooledSession[F[_] : {MonadCancelThrow}](postgres: Pool[F]): Transactor[F] =
     new Transactor[F]:
       override def transact[A](f: Session[F] => F[A]): F[A] =
         postgres.use: session =>
