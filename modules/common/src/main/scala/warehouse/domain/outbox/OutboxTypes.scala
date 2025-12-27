@@ -20,3 +20,5 @@ case class CreateOutboxEntry(
     eventType: EventType,
     username: Username
 )
+
+case class OutboxEntryNotFound(id: UUID) extends Exception(s"Outbox entry with id $id not found.")
