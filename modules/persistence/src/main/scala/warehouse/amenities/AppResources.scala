@@ -15,7 +15,7 @@ import warehouse.domain.skunk.Pool
 import java.util.UUID
 
 case class AppResources[F[_]](
-    postgres: Pool[F],
+    postgres: Pool[F]
 )
 
 object AppResources:
@@ -39,6 +39,4 @@ object AppResources:
         )
         .evalTap(checkPostgresConnection)
 
-
     mkPostgres.map(postgres => AppResources(postgres))
-    

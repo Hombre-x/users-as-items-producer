@@ -1,7 +1,6 @@
 package warehouse.domain.commands
 
-import io.circe.Codec
-import warehouse.domain.user.{CreateUser, UpdateUser, Username}
+import warehouse.domain.user.Username
 
 import java.time.Instant
 

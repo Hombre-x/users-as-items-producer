@@ -9,9 +9,9 @@ import java.util.UUID
 
 trait Notifier[F[_]]:
   def notify(channel: Identifier)(notificationId: UUID): F[Unit]
-  
+
 object Notifier:
-  def skunk[F[_] : MonadCancelThrow](postgres: Pool[F]): Notifier[F] = new Notifier[F]:
+  def skunk[F[_]: MonadCancelThrow](postgres: Pool[F]): Notifier[F] = new Notifier[F]:
     def notify(channel: Identifier)(notificationId: UUID): F[Unit] =
       postgres.use: session =>
         for

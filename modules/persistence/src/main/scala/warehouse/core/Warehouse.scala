@@ -57,7 +57,7 @@ end Warehouse
 object Warehouse:
 
   def apply[F[_]: {ApplicativeThrow, UUIDGen, Clock, Concurrent}](
-      users: Users[F],
-  ): Warehouse[F] = new Warehouse(users) 
+      users: Users[F]
+  ): Warehouse[F] = new Warehouse(users)
 
 end Warehouse

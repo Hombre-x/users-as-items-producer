@@ -7,4 +7,3 @@ import warehouse.domain.commands.UserCommand
 
 given Configuration      = Configuration.default.withDiscriminator("$type")
 given Codec[UserCommand] = ConfiguredCodec.derived
-

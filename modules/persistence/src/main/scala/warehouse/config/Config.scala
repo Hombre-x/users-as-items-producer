@@ -8,10 +8,12 @@ import warehouse.domain.config.*
 
 object Config:
 
-  case class AppConfig(producerConfig: ProducerConfig, 
-                       consumerConfig: ConsumerConfig, 
-                       postgresConfig: PostgreSQLConfig, 
-                       httpConfig: HttpConfig)
+  case class AppConfig(
+      producerConfig: ProducerConfig,
+      consumerConfig: ConsumerConfig,
+      postgresConfig: PostgreSQLConfig,
+      httpConfig: HttpConfig
+  )
 
   def load[F[_]: Async]: F[AppConfig] =
     (

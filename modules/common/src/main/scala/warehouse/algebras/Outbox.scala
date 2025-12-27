@@ -34,7 +34,7 @@ object Outbox:
       override def fetchUnprocessed(limit: Int): F[List[OutboxEntry]] =
         postgres.use: se =>
           se.execute(selectUnprocessed)(limit)
-          
+
       override def markAsProcessed(id: UUID): F[OutboxEntry] =
         postgres.use: se =>
           se.unique(markProcessed)(id)
@@ -43,10 +43,9 @@ end Outbox
 private object OutboxSql:
 
   // Encoders & Decoders
-  private val outboxEncoder: Encoder[OutboxEntry] =
-    (uuid *: eventId *: eventType *: username *: timestamptz *: processed).to[OutboxEntry]
+  (uuid *: eventId *: eventType *: username *: timestamptz *: processed).to[OutboxEntry]
 
-  private val outboxDecoder: Decoder[OutboxEntry] =
+  private val outboxDecoder: Decoder[OutboxEntry]          =
     (uuid ~ eventId ~ eventType ~ username ~ timestamptz ~ processed).map:
       case id ~ evId ~ evType ~ username ~ createdAt ~ proc =>
         OutboxEntry(id, evId, evType, username, createdAt, proc)
@@ -66,7 +65,7 @@ private object OutboxSql:
       ORDER BY created_at
       LIMIT $int4;
     """
-    
+
   private val selectByIdSql: Fragment[UUID] =
     sql"""
       SELECT id, event_id, event_type, username, created_at, processed
@@ -83,9 +82,9 @@ private object OutboxSql:
     """
 
   // Queries & Commands
-  val selectUnprocessed: Query[Int, OutboxEntry] = selectUnprocessedSql.query(outboxDecoder)
-  val selectById: Query[UUID, OutboxEntry]      = selectByIdSql.query(outboxDecoder)
-  val insertOutbox: Query[CreateOutboxEntry, UUID]     = insertOutboxSql.query(uuid)
-  val markProcessed: Query[UUID, OutboxEntry]   = markProcessedSql.query(outboxDecoder)
+  val selectUnprocessed: Query[Int, OutboxEntry]   = selectUnprocessedSql.query(outboxDecoder)
+  val selectById: Query[UUID, OutboxEntry]         = selectByIdSql.query(outboxDecoder)
+  val insertOutbox: Query[CreateOutboxEntry, UUID] = insertOutboxSql.query(uuid)
+  val markProcessed: Query[UUID, OutboxEntry]      = markProcessedSql.query(outboxDecoder)
 
 end OutboxSql

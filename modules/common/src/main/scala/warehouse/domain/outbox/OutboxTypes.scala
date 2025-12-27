@@ -18,5 +18,5 @@ case class OutboxEntry(
 case class CreateOutboxEntry(
     eventId: UUID,
     eventType: EventType,
-    username: Username,
+    username: Username
 )

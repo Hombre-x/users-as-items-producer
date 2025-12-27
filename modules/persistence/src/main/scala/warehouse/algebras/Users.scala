@@ -3,18 +3,15 @@ package warehouse.algebras
 import cats.effect.std.UUIDGen
 import cats.effect.{MonadCancelThrow, Sync}
 import cats.syntax.all.*
-import io.circe.syntax.*
 import skunk.*
 import skunk.codec.temporal.timestamp
 import skunk.data.Completion.Delete
 import skunk.syntax.all.*
 import warehouse.domain.EventType
-import warehouse.domain.config.PostgreSQLConfig
 import warehouse.domain.outbox.CreateOutboxEntry
 import warehouse.domain.skunk.Pool
 import warehouse.domain.skunk.UserCodecs.*
 import warehouse.domain.user.*
-import warehouse.lib.Base64
 
 import java.time.LocalDateTime
 
@@ -53,9 +50,9 @@ object Users:
                           case SqlState.UniqueViolation(_) =>
                             UsernameAlreadyExists(user.username).raiseError[F, Username]
 
-          entry        = CreateOutboxEntry(eventId, EventType.UserCreated, user.username)
-          outboxId    <- outbox.persist(entry)
-          _           <- notifier.notify(id"warehouse_outbox_creations")(outboxId)
+          entry     = CreateOutboxEntry(eventId, EventType.UserCreated, user.username)
+          outboxId <- outbox.persist(entry)
+          _        <- notifier.notify(id"warehouse_outbox_creations")(outboxId)
         yield username
 
     override def update(user: UpdateUser): F[Username] =
@@ -72,10 +69,10 @@ object Users:
                            .as(user.username)
                            .recoverWith:
                              case ex => xa.rollback(savepoint) >> ex.raiseError[F, Username]
-                             
-            entry      = CreateOutboxEntry(eventId, EventType.UserUpdated, user.username)
-            outboxId  <- outbox.persist(entry)
-            _         <- notifier.notify(id"warehouse_outbox_updates")(outboxId)
+
+            entry     = CreateOutboxEntry(eventId, EventType.UserUpdated, user.username)
+            outboxId <- outbox.persist(entry)
+            _        <- notifier.notify(id"warehouse_outbox_updates")(outboxId)
           yield username
 
     override def delete(username: Username): F[Boolean] =
