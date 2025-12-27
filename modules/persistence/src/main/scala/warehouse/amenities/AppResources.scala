@@ -38,15 +38,14 @@ object AppResources:
           max = 8
         )
         .evalTap(checkPostgresConnection)
-        
+
     def mkTxServices(postgres: Pool[F]): Resource[F, TransactionalServices[F]] =
       TransactionalServices.make[F](postgres)
-      
-    for 
+
+    for
       postgres   <- mkPostgres
       txServices <- mkTxServices(postgres)
-    yield 
-      AppResources[F](
-        postgres = postgres,
-        txServices = txServices
-      )
+    yield AppResources[F](
+      postgres = postgres,
+      txServices = txServices
+    )

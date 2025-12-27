@@ -57,21 +57,21 @@ object Users:
 
     override def update(user: UpdateUser): F[Username] =
       session.transaction.use: xa =>
-          for
-            now       <- Sync[F].delay(LocalDateTime.now())
-            eventId   <- UUIDGen[F].randomUUID
-            savepoint <- xa.savepoint
-            cmd       <- session.prepare(changeUser)
-            username  <- cmd
-                           .execute((user.email, user.name, now, user.username))
-                           .as(user.username)
-                           .recoverWith:
-                             case ex => xa.rollback(savepoint) >> ex.raiseError[F, Username]
+        for
+          now       <- Sync[F].delay(LocalDateTime.now())
+          eventId   <- UUIDGen[F].randomUUID
+          savepoint <- xa.savepoint
+          cmd       <- session.prepare(changeUser)
+          username  <- cmd
+                         .execute((user.email, user.name, now, user.username))
+                         .as(user.username)
+                         .recoverWith:
+                           case ex => xa.rollback(savepoint) >> ex.raiseError[F, Username]
 
-            entry     = CreateOutboxEntry(eventId, EventType.UserUpdated, user.username)
-            outboxId <- outbox.persist(entry)
-            _        <- notifier.notify(id"warehouse_outbox_updates")(outboxId)
-          yield username
+          entry     = CreateOutboxEntry(eventId, EventType.UserUpdated, user.username)
+          outboxId <- outbox.persist(entry)
+          _        <- notifier.notify(id"warehouse_outbox_updates")(outboxId)
+        yield username
 
     override def delete(username: Username): F[Boolean] =
       session.transaction.surround:

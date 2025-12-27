@@ -8,7 +8,7 @@ object TransactionalServices:
 
   def make[F[_] : Sync](postgres: Pool[F]): Resource[F, TransactionalServices[F]] =
     postgres.map: se =>
-      val _outbox = Outbox.postgresSession[F](se)
+      val _outbox   = Outbox.postgresSession[F](se)
       val _notifier = Notifier.skunk[F](se)
       new TransactionalServices[F](
         users = Users.fromSession[F](_notifier, _outbox, se),
@@ -23,4 +23,3 @@ sealed abstract class TransactionalServices[F[_]] private (
     val outbox: Outbox[F],
     val notifier: Notifier[F]
 )
-

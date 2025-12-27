@@ -6,7 +6,6 @@ import cats.syntax.all.*
 import skunk.Session
 import skunk.data.Identifier
 
-
 import java.util.UUID
 
 trait Notifier[F[_]]:
@@ -19,4 +18,3 @@ object Notifier:
         ch <- session.channel(channel).pure[F]
         _  <- ch.notify(notificationId.toString)
       yield ()
-

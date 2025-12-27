@@ -43,8 +43,7 @@ object Outbox:
       override def markAsProcessed(id: UUID): F[OutboxEntry] =
         postgres.use: se =>
           se.unique(markProcessed)(id)
-          
-          
+
   def postgresSession[F[_]](session: Session[F]): Outbox[F] =
     new Outbox[F]:
       import OutboxSql.*
