@@ -44,7 +44,8 @@ object Users:
       tx.transact: se =>
         for
           eventId  <- UUIDGen[F].randomUUID
-          username <- se.execute(createUser)(user)
+          username <- se
+                        .execute(createUser)(user)
                         .as(user.username)
                         .recoverWith:
                           case SqlState.UniqueViolation(_) =>
@@ -79,7 +80,8 @@ object Users:
       tx.transact: se =>
         for
           eventId <- UUIDGen[F].randomUUID
-          deleted <- se.execute(deleteUser)(username)
+          deleted <- se
+                       .execute(deleteUser)(username)
                        .map:
                          case Delete(n) if n > 0 => true
                          case _                  => false

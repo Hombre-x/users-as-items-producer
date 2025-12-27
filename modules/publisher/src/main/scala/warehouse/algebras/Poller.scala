@@ -5,7 +5,6 @@ import fs2.Stream
 import io.circe.Codec
 import io.circe.parser.decode
 import skunk.data.Identifier
-import skunk.syntax.all.id
 import warehouse.domain.skunk.Pool
 
 trait Poller[F[_], A]:
