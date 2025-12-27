@@ -12,8 +12,6 @@ import skunk.{Session, SessionPool}
 import warehouse.config.Config.AppConfig
 import warehouse.domain.skunk.Pool
 
-import java.util.UUID
-
 case class AppResources[F[_]](
     postgres: Pool[F]
 )

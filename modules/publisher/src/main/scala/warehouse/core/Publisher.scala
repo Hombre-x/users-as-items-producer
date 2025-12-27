@@ -3,17 +3,16 @@ package warehouse.core
 import cats.Parallel
 import cats.syntax.all.*
 import cats.effect.{Clock, Concurrent}
-import cats.effect.std.UUIDGen
 import fs2.Stream
 import org.typelevel.log4cats.Logger
 import skunk.syntax.all.*
 import warehouse.algebras.{Outbox, Poller, Producer}
 import warehouse.domain.commands.UserCommand
 import warehouse.domain.EventType
+import warehouse.domain.outbox.{OutboxEntry, OutboxEntryNotFound}
 
 import java.util.UUID
 import java.time.Instant
-import warehouse.domain.outbox.{OutboxEntry, OutboxEntryNotFound}
 
 class Publisher[F[_]: {Concurrent, Parallel, Clock, Logger as log}](
     producer: Producer[F, UserCommand],
@@ -60,7 +59,6 @@ class Publisher[F[_]: {Concurrent, Parallel, Clock, Logger as log}](
             case None        =>
               log.warn(s"Outbox entry with id $outboxId not found.") >>
                 OutboxEntryNotFound(outboxId).raiseError[F, OutboxEntry]
-              
       .evalMap: entry =>
         for
           command <- produceEvent(entry)

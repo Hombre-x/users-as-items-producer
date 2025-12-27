@@ -8,7 +8,6 @@ import io.github.arainko.ducktape.*
 import warehouse.algebras.Users
 import warehouse.domain.user.{CreateUser, UpdateUser, User, UserId, UserNotFound, Username}
 
-import java.time.Instant
 import java.util.UUID
 
 class Warehouse[F[_]: {ApplicativeThrow, UUIDGen, Clock, Concurrent}](users: Users[F]):
@@ -27,7 +26,7 @@ class Warehouse[F[_]: {ApplicativeThrow, UUIDGen, Clock, Concurrent}](users: Use
     for
       userOpt  <- users.get(updateUser.username)
       username <- userOpt match
-                    case Some(existingUser) =>
+                    case Some(_) =>
                       for
                         now      <- Clock[F].realTime
 //                        command   =
@@ -35,21 +34,21 @@ class Warehouse[F[_]: {ApplicativeThrow, UUIDGen, Clock, Concurrent}](users: Use
                         username <- users.update(updateUser)
 //                        _        <- producer.send(command)
                       yield username
-                    case None               => UserNotFound(updateUser.username).raiseError[F, Username]
+                    case None    => UserNotFound(updateUser.username).raiseError[F, Username]
     yield username
 
   def deleteUser(username: Username): F[Boolean] =
     for
       userOpt    <- users.get(username)
       wasDeleted <- userOpt match
-                      case Some(user) =>
+                      case Some(_) =>
                         for
                           now     <- Clock[F].realTime
 //                          command  = UserCommand.DeleteUserCommand(user.id, Instant.ofEpochMilli(now.toMillis), username)
                           deleted <- users.delete(username)
 //                          _       <- producer.send(command)
                         yield deleted
-                      case None       => false.pure[F]
+                      case None    => false.pure[F]
     yield wasDeleted
 
 end Warehouse
