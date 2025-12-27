@@ -14,6 +14,8 @@ import java.util.UUID
 
 trait Outbox[F[_]]:
 
+  def getById(id: UUID): F[Option[OutboxEntry]]
+
   def persist(entry: CreateOutboxEntry): F[UUID]
 
   def fetchUnprocessed(limit: Int): F[List[OutboxEntry]]
@@ -27,6 +29,9 @@ object Outbox:
   def postgres[F[_]: MonadCancelThrow](postgres: Pool[F]): Outbox[F] =
     new Outbox[F]:
       import OutboxSql.*
+
+      override def getById(id: UUID): F[Option[OutboxEntry]] =
+        postgres.use(se => se.option(selectById)(id))
 
       override def persist(entry: CreateOutboxEntry): F[UUID] =
         postgres.use(se => se.unique(insertOutbox)(entry))
