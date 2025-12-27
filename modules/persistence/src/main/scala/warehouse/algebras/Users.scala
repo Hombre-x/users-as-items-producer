@@ -9,7 +9,7 @@ import skunk.data.Completion.Delete
 import skunk.syntax.all.*
 import warehouse.domain.EventType
 import warehouse.domain.outbox.CreateOutboxEntry
-import warehouse.domain.skunk.Pool
+
 import warehouse.domain.skunk.UserCodecs.*
 import warehouse.domain.user.*
 
@@ -27,24 +27,23 @@ end Users
 
 object Users:
 
-  def postgres[F[_] : {Sync, MonadCancelThrow}](
-      tx: Transactor[F],
+  def fromSession[F[_] : {Sync, MonadCancelThrow}](
       notifier: Notifier[F],
       outbox: Outbox[F],
-      postgres: Pool[F]
+      session: Session[F]
   ): Users[F] = new Users[F]:
 
     import UsersSql.*
 
-    override def get(username: Username): F[Option[User]] = postgres.use(se => se.option(selectUser)(username))
+    override def get(username: Username): F[Option[User]] = session.option(selectUser)(username)
 
-    override def getById(userId: UserId): F[Option[User]] = postgres.use(se => se.option(selectUserById)(userId))
+    override def getById(userId: UserId): F[Option[User]] = session.option(selectUserById)(userId)
 
     override def create(user: User): F[Username] =
-      tx.transact: se =>
+      session.transaction.surround:
         for
           eventId  <- UUIDGen[F].randomUUID
-          username <- se
+          username <- session
                         .execute(createUser)(user)
                         .as(user.username)
                         .recoverWith:
@@ -57,14 +56,12 @@ object Users:
         yield username
 
     override def update(user: UpdateUser): F[Username] =
-      postgres
-        .flatMap(se => se.transaction.map(xa => (se, xa)))
-        .use: (se, xa) =>
+      session.transaction.use: xa =>
           for
             now       <- Sync[F].delay(LocalDateTime.now())
             eventId   <- UUIDGen[F].randomUUID
             savepoint <- xa.savepoint
-            cmd       <- se.prepare(changeUser)
+            cmd       <- session.prepare(changeUser)
             username  <- cmd
                            .execute((user.email, user.name, now, user.username))
                            .as(user.username)
@@ -77,10 +74,10 @@ object Users:
           yield username
 
     override def delete(username: Username): F[Boolean] =
-      tx.transact: se =>
+      session.transaction.surround:
         for
           eventId <- UUIDGen[F].randomUUID
-          deleted <- se
+          deleted <- session
                        .execute(deleteUser)(username)
                        .map:
                          case Delete(n) if n > 0 => true

@@ -26,7 +26,7 @@ end Outbox
 
 object Outbox:
 
-  def postgres[F[_] : MonadCancelThrow](postgres: Pool[F]): Outbox[F] =
+  def postgresPool[F[_] : MonadCancelThrow](postgres: Pool[F]): Outbox[F] =
     new Outbox[F]:
       import OutboxSql.*
 
@@ -43,6 +43,23 @@ object Outbox:
       override def markAsProcessed(id: UUID): F[OutboxEntry] =
         postgres.use: se =>
           se.unique(markProcessed)(id)
+          
+          
+  def postgresSession[F[_]](session: Session[F]): Outbox[F] =
+    new Outbox[F]:
+      import OutboxSql.*
+
+      override def getById(id: UUID): F[Option[OutboxEntry]] =
+        session.option(selectById)(id)
+
+      override def persist(entry: CreateOutboxEntry): F[UUID] =
+        session.unique(insertOutbox)(entry)
+
+      override def fetchUnprocessed(limit: Int): F[List[OutboxEntry]] =
+        session.execute(selectUnprocessed)(limit)
+
+      override def markAsProcessed(id: UUID): F[OutboxEntry] =
+        session.unique(markProcessed)(id)
 end Outbox
 
 private object OutboxSql:
