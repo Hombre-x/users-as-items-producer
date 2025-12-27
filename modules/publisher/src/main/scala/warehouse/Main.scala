@@ -24,7 +24,7 @@ object Main extends IOApp.Simple:
             .make[IO](config)
             .use: resources =>
               val poller    = Poller.string(resources.postgres)
-              val outbox    = Outbox.postgres(resources.postgres)
+              val outbox    = Outbox.postgresPool(resources.postgres)
               val publisher = Publisher(resources.userProducer, poller, outbox)
 
               publisher.stream
