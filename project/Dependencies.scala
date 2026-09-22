@@ -1,24 +1,24 @@
 import sbt.*
 
-object Dependencies {
-  private object Versions {
-    val toolkit            = "0.1.29"
-    val http4s             = "0.23.33"
+object Dependencies:
+  private object Versions:
+    val toolkit            = "0.2.0"
+    val http4s             = "0.23.37"
     val http4sPrometheus   = "0.25.0"
     val fs2Kafka           = "3.9.1"
-    val circe    = "0.14.15"
-    val skunk    = "1.1.0-M3"
-    val ciris    = "3.11.1"
+    val circe    = "0.14.16"
+    val skunk    = "1.0.0"
+    val ciris    = "3.15.1"
     val scodec   = "2.3.3"
-    val iron     = "3.2.1"
-    val ducktape = "0.2.10"
+    val iron     = "3.3.2"
+    val ducktape = "0.2.13"
     val kittens  = "3.5.0"
 
     // Java
-    val logback = "1.5.21"
-  }
+    val logback = "1.6.3"
+  end Versions
 
-  private object Organizations {
+  private object Organizations:
     val typelevel = "org.typelevel"
     val http4s    = "org.http4s"
     val fd4s      = "com.github.fd4s"
@@ -29,9 +29,9 @@ object Dependencies {
     val iltotore  = "io.github.iltotore"
     val arainko   = "io.github.arainko"
     val logback   = "ch.qos.logback"
-  }
+  end Organizations
 
-  object Libraries {
+  object Libraries:
 
     // Typelevel toolkit
     val toolkit = Organizations.typelevel %% "toolkit" % Versions.toolkit
@@ -72,6 +72,7 @@ object Dependencies {
 
     // Java
     val logbackClassic = Organizations.logback % "logback-classic" % Versions.logback
-  }
-}
-
+    
+  end Libraries
+  
+end Dependencies
