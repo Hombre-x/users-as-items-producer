@@ -7,7 +7,7 @@ object Dependencies:
     val http4sPrometheus   = "0.25.0"
     val fs2Kafka           = "3.9.1"
     val circe    = "0.14.16"
-    val skunk    = "1.0.0"
+    val skunk    = "1.0.0-M12"
     val ciris    = "3.15.1"
     val scodec   = "2.3.3"
     val iron     = "3.3.2"
