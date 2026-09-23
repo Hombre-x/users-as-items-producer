@@ -40,8 +40,15 @@ build/
 ### Mac OS ###
 .DS_Store
 
+### OpenCode ###
+.opencode/
+
+### Graphify ###
+graphify-out/
+
 ### Scala ###
 .bsp/
 .bloop/
 .metals/
 null/
+
